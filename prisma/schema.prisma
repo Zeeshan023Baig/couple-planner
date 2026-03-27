@@ -1,0 +1,31 @@
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id          String  @id @default(cuid())
+  name        String
+  passcode    String  // For simple hackathon login
+  coupleId    String?
+  couple      Couple? @relation(fields: [coupleId], references: [id])
+  income      Float   @default(0)
+  expenses    Float   @default(0)
+  savings     Float   @default(0)
+  invest      Float   @default(0)
+  investType  String  @default("")
+  risk        String  @default("moderate")
+  isPartnerA  Boolean @default(true)
+}
+
+model Couple {
+  id           String @id @default(cuid())
+  users        User[]
+  sharedGoals  String @default("[]") // JSON string of goals array
+  goalAmount   Float  @default(0)
+  goalTimeline Int    @default(5)
+}
