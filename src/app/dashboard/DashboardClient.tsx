@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import ThemeToggle from "../components/ThemeToggle";
 
 export default function DashboardClient({ user, partnerB, couple }: any) {
   const [isLoaded, setIsLoaded] = useState(false);
@@ -63,13 +64,26 @@ export default function DashboardClient({ user, partnerB, couple }: any) {
           </div>
           <span>{A.name} & {B.name}</span>
         </div>
-        <button className="btn-restart" onClick={() => window.location.href = '/onboarding'}>↺ Restart</button>
+        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+            <ThemeToggle />
+            <button className="btn-restart" onClick={() => window.location.href = '/onboarding'}>↺ Restart</button>
+        </div>
       </nav>
 
       <div className="dash-content">
         <div className="dash-greeting fade-up">
-          <h1>Your Financial <em style={{ fontStyle: 'italic', color: 'var(--gold)' }}>Relationship</em> Report</h1>
-          <p>Generated {new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })} • AI-powered couple analysis</p>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+            <div>
+              <h1>Your Financial <em style={{ fontStyle: 'italic', color: 'var(--gold)' }}>Relationship</em> Report</h1>
+              <p>Generated {new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })} • AI-powered couple analysis</p>
+            </div>
+            {A.isPartnerA && (
+              <div style={{ background: 'var(--deep)', padding: '12px 16px', borderRadius: '8px', border: '1px solid var(--gold)', textAlign: 'right' }}>
+                <div style={{ fontSize: '10px', color: 'var(--gold)', letterSpacing: '1px', textTransform: 'uppercase', marginBottom: '4px' }}>Partner Invite Code</div>
+                <div style={{ fontFamily: 'DM Mono, monospace', color: 'white', fontSize: '14px', fontWeight: 'bold' }}>{couple.id}</div>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* SCORE CARD */}

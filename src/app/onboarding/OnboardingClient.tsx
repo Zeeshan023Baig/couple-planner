@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import PartnerForm from "../components/PartnerForm";
 import GoalsForm from "../components/GoalsForm";
+import ThemeToggle from "../components/ThemeToggle";
 import { useRouter } from "next/navigation";
 
 export default function OnboardingClient({ user, couple }: any) {
@@ -30,20 +31,23 @@ export default function OnboardingClient({ user, couple }: any) {
 
   return (
     <div id="onboarding" className="screen active">
-      <nav className="onboard-nav">
-        <div className="nav-logo">Two<span>Wallet</span></div>
+      <nav className="onboard-nav" style={{ background: 'var(--card)' }}>
+        <div className="nav-logo" style={{ color: 'var(--charcoal)' }}>Two<span>Wallet</span></div>
         <div className="progress-bar-wrap">
           <div className="progress-label">Setup Progress</div>
           <div className="progress-track">
             <div className="progress-fill" style={{ width: `${(step / 4) * 100}%` }}></div>
           </div>
         </div>
-        <div className="step-counter">Step {step} of 4</div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+            <ThemeToggle />
+            <div className="step-counter">Step {step} of 4</div>
+        </div>
       </nav>
 
       <div className="onboard-body">
-        {step === 1 && <PartnerForm partner="A" user={partnerA} nextStep={nextStep} />}
-        {step === 2 && <PartnerForm partner="B" user={partnerB} nextStep={nextStep} prevStep={prevStep} />}
+        {step === 1 && <PartnerForm partner="A" user={partnerA} coupleId={couple.id} nextStep={nextStep} />}
+        {step === 2 && <PartnerForm partner="B" user={partnerB} coupleId={couple.id} nextStep={nextStep} prevStep={prevStep} />}
         {step === 3 && <GoalsForm couple={couple} nextStep={nextStep} prevStep={prevStep} />}
       </div>
     </div>

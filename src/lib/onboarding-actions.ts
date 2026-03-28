@@ -1,18 +1,38 @@
+"use server";
+
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 
-export async function updateProfileAction(userId: string, data: any) {
-  await prisma.user.update({
-    where: { id: userId },
-    data: {
+export async function updateProfileAction(userId: string | undefined, coupleId: string, isPartnerA: boolean, data: any) {
+  if (!userId) {
+    // Create new partner user linked to couple
+    await prisma.user.create({
+      data: {
+        name: data.name || (isPartnerA ? "Partner A" : "Partner B"),
+        passcode: "demo",
+        isPartnerA,
+        coupleId,
         income: parseFloat(data.income) || 0,
         expenses: parseFloat(data.expenses) || 0,
         savings: parseFloat(data.savings) || 0,
         invest: parseFloat(data.invest) || 0,
         investType: data.investType || "",
         risk: data.risk || "moderate"
-    }
-  });
+      }
+    });
+  } else {
+    await prisma.user.update({
+      where: { id: userId },
+      data: {
+        income: parseFloat(data.income) || 0,
+        expenses: parseFloat(data.expenses) || 0,
+        savings: parseFloat(data.savings) || 0,
+        invest: parseFloat(data.invest) || 0,
+        investType: data.investType || "",
+        risk: data.risk || "moderate"
+      }
+    });
+  }
   revalidatePath("/onboarding-a");
   revalidatePath("/onboarding-b");
   revalidatePath("/dashboard");

@@ -1,3 +1,5 @@
+"use server";
+
 import { prisma } from "@/lib/prisma";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
@@ -22,11 +24,22 @@ export async function loginAction(formData: FormData) {
   
   if (!user.coupleId) {
     if (inviteCode) {
-        // Link to existing couple
-        await prisma.user.update({
-            where: { id: user.id },
-            data: { coupleId: inviteCode, isPartnerA: false }
-        });
+        // Verify code exists first
+        const existingCouple = await prisma.couple.findUnique({ where: { id: inviteCode } });
+        if (existingCouple) {
+            // Link to existing couple
+            await prisma.user.update({
+                where: { id: user.id },
+                data: { coupleId: inviteCode, isPartnerA: false }
+            });
+        } else {
+            // Fallback for demo: create new if invalid
+            const couple = await prisma.couple.create({ data: {} });
+            await prisma.user.update({
+                where: { id: user.id },
+                data: { coupleId: couple.id, isPartnerA: true }
+            });
+        }
     } else {
         // Create new couple
         const couple = await prisma.couple.create({ data: {} });

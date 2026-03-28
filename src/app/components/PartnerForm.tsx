@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { updateProfileAction } from "@/lib/onboarding-actions";
 
-export default function PartnerForm({ partner, user, nextStep, prevStep }: any) {
+export default function PartnerForm({ partner, user, coupleId, nextStep, prevStep }: any) {
   const [loading, setLoading] = useState(false);
   const [risk, setRisk] = useState(user?.risk || "");
 
@@ -13,7 +13,7 @@ export default function PartnerForm({ partner, user, nextStep, prevStep }: any) 
     const formData = new FormData(e.target);
     const data = Object.fromEntries(formData.entries());
     data.risk = risk;
-    await updateProfileAction(user.id, data);
+    await updateProfileAction(user?.id, coupleId, partner === 'A', data);
     setLoading(false);
     nextStep();
   }
