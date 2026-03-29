@@ -5,16 +5,13 @@ import ThemeToggle from "../components/ThemeToggle";
 
 export default function DashboardClient({ user, partnerB, couple }: any) {
   const [isLoaded, setIsLoaded] = useState(false);
+  const [query, setQuery] = useState("");
+  const [aiResponse, setAiResponse] = useState("");
+  const [isThinking, setIsThinking] = useState(false);
+
+  // -- DATA CONSTANTS
   const A = user;
   const B = partnerB || { name: 'Partner B', income: 0, expenses: 0, savings: 0, invest: 0, investType: '', risk: 'safe' };
-  const goals = JSON.parse(couple?.sharedGoals || "[]");
-  const goalAmount = couple?.goalAmount || 3000000;
-  const goalTimeline = couple?.goalTimeline || 5;
-
-  useEffect(() => {
-    setIsLoaded(true);
-  }, []);
-
   // -- CALCULATIONS ported from prototype
   const fmt = (num: number) => new Intl.NumberFormat('en-IN').format(Math.round(num));
 
@@ -30,6 +27,30 @@ export default function DashboardClient({ user, partnerB, couple }: any) {
   const savingsScore = Math.min(100, Math.round(savingsRate * 250));
   const spendScore = Math.max(0, 100 - Math.round(spendDiff * 200));
   const goalProgress = Math.min(100, Math.round((A.savings + B.savings) / goalAmount * 100));
+  const overallScore = Math.round((savingsScore * 0.3 + spendScore * 0.3 + goalProgress * 0.2 + riskMatch * 0.2));
+
+  async function askAI() {
+    if (!query) return;
+    setIsThinking(true);
+    setAiResponse("");
+    try {
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          message: query,
+          user: A,
+          partner: B,
+          score: overallScore
+        })
+      });
+      const data = await res.json();
+      setAiResponse(data.response);
+    } catch (e) {
+      setAiResponse("Sorry, I encountered an error connecting to my neural network. Please try again.");
+    }
+    setIsThinking(false);
+  }
   const overallScore = Math.round((savingsScore * 0.3 + spendScore * 0.3 + goalProgress * 0.2 + riskMatch * 0.2));
 
   const grades = overallScore >= 80 ? ['Excellent Harmony 🌟', 'Your financial partnership is strong and well-aligned. Minor optimisations will take you to perfection.'] :
@@ -192,9 +213,37 @@ export default function DashboardClient({ user, partnerB, couple }: any) {
             <div className="dash-card-title">💬 Ask Your AI Financial Advisor</div>
             <div className="ai-badge">✦ Live AI</div>
           </div>
-          <div style={{ display: 'flex', gap: '12px' }}>
-             <input type="text" placeholder="e.g. Should we open a joint account?" style={{ flex: 1 }} />
-             <button className="btn-primary" onClick={() => alert("Simulation: AI analysis started for " + A.name)}>Ask →</button>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+             <div style={{ display: 'flex', gap: '12px' }}>
+                <input 
+                  type="text" 
+                  placeholder="e.g. Should we open a joint account?" 
+                  style={{ flex: 1 }} 
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && askAI()}
+                />
+                <button className="btn-primary" onClick={askAI} disabled={isThinking}>
+                  {isThinking ? "Thinking..." : "Ask →"}
+                </button>
+             </div>
+
+             {(isThinking || aiResponse) && (
+                <div className="ai-response-area fade-up" style={{ padding: '20px', background: 'var(--warm-white)', borderRadius: '8px', border: '1px solid var(--gold)', minHeight: '60px' }}>
+                  {isThinking ? (
+                    <div className="generating-indicator">
+                      <div className="gen-dot"></div>
+                      <div className="gen-dot"></div>
+                      <div className="gen-dot"></div>
+                      <span>AI IS ANALYSING DATA</span>
+                    </div>
+                  ) : (
+                    <div style={{ fontSize: '15px', lineHeight: '1.6', color: 'var(--charcoal)' }}>
+                      <span style={{ color: 'var(--gold)', fontWeight: 'bold' }}>Advisor:</span> {aiResponse}
+                    </div>
+                  )}
+                </div>
+             )}
           </div>
         </div>
       </div>
