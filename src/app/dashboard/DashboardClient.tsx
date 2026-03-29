@@ -12,6 +12,10 @@ export default function DashboardClient({ user, partnerB, couple }: any) {
   // -- DATA CONSTANTS
   const A = user;
   const B = partnerB || { name: 'Partner B', income: 0, expenses: 0, savings: 0, invest: 0, investType: '', risk: 'safe' };
+  const goals = JSON.parse(couple?.sharedGoals || "[]");
+  const goalAmount = couple?.goalAmount || 3000000;
+  const goalTimeline = couple?.goalTimeline || 5;
+
   // -- CALCULATIONS ported from prototype
   const fmt = (num: number) => new Intl.NumberFormat('en-IN').format(Math.round(num));
 
@@ -51,7 +55,6 @@ export default function DashboardClient({ user, partnerB, couple }: any) {
     }
     setIsThinking(false);
   }
-  const overallScore = Math.round((savingsScore * 0.3 + spendScore * 0.3 + goalProgress * 0.2 + riskMatch * 0.2));
 
   const grades = overallScore >= 80 ? ['Excellent Harmony 🌟', 'Your financial partnership is strong and well-aligned. Minor optimisations will take you to perfection.'] :
                  overallScore >= 65 ? ['Good Alignment 💛', 'Solid foundation with room to grow. A few strategic changes can significantly improve your financial harmony.'] :
